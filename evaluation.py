@@ -43,10 +43,17 @@ def eval(results: List[Result]):
         score = 0
         for id in res.db_ids:
             try:
+                #actual(ground truth) [vec32,vec12,vec10 ....]
+                #so we look for a certain vec(the one retrieved) say vec10
+                #its position is 2 so ind will be 2
                 ind = res.actual_ids.index(id)
+
+                #assuming the returned ind from the actual ordering is so far that it's 3 times greater than the kth element
+                #just take away how far it is which is greater than k
                 if ind > res.top_k * 3:
                     score -= ind
             except:
+                #if the vector doesnt exist in the database take away the number of rows in the database
                 score -= len(res.actual_ids)
         scores.append(score)
 
