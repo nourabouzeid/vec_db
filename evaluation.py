@@ -15,7 +15,7 @@ class Result:
 def run_queries(db, np_rows, top_k, num_runs):
     results = []
     for _ in range(num_runs):
-        query = np.random.random((1,70))
+        query = np.random.random((1,64))
         
         tic = time.time()
         db_ids = db.retrieve(query, top_k)
@@ -61,8 +61,7 @@ def eval(results: List[Result]):
 
 
 if __name__ == "__main__":
-    db = VecDB(db_size = 10**2)
-
+    db = VecDB(db_size = 10**7, database_file_path="10M_DB.dat", index_file_path="10M_index", new_db = True)
     all_db = db.get_all_rows()
 
     res = run_queries(db, all_db, 5, 10)
