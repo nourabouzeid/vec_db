@@ -36,7 +36,7 @@ SAMPLE_SIZE = 500_000
 
 class VecDB:
     def __init__(self, database_file_path="saved_db.dat", index_file_path="index.dat",
-                 new_db=True, db_size=None) -> None:
+                 new_db=True, db_size=None, new_index = True) -> None:
         self.db_path = database_file_path
         self.index_path = index_file_path
         os.makedirs(self.index_path, exist_ok=True)
@@ -48,6 +48,8 @@ class VecDB:
             if os.path.exists(self.db_path):
                 os.remove(self.db_path)
             self.generate_database(db_size)
+        if new_index:
+            self._build_index()
 
     def generate_database(self, size: int) -> None:
         rng = np.random.default_rng(DB_SEED_NUMBER)
@@ -139,6 +141,7 @@ class VecDB:
 
         # normalize sample rows (so PQ approximates cosine reasonably)
         sample_norms = np.linalg.norm(sample, axis=1, keepdims=True)
+        sample_norms[sample_norms == 0] = 1.0
         sample = sample / sample_norms
 
         '''
@@ -156,6 +159,7 @@ class VecDB:
         centroids = kmeans_ivf.cluster_centers_.astype(np.float32)
         # normalize centroids
         c_norms = np.linalg.norm(centroids, axis=1, keepdims=True)
+        c_norms[c_norms == 0] = 1.0
         centroids = centroids / c_norms
         
         np.save(os.path.join(self.index_path,"centroids.npy"), centroids)
@@ -201,6 +205,7 @@ class VecDB:
 
             # normalize chunk
             norms = np.linalg.norm(chunk, axis=1, keepdims=True)
+            norms[norms == 0] = 1.0
             chunk_norm = chunk / norms  
 
             # compute similarity to centroids (dot product because normalized)
